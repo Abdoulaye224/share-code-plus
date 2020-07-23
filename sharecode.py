@@ -35,7 +35,6 @@ def publish():
     uid  = request.form['uid']
     langage = request.form['langage']
     save_doc_as_file(uid,code,langage)
-
     return redirect("{}{}/{}".format(request.host_url,
                                      request.form['submit'],
                                      uid))

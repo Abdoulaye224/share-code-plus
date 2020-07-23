@@ -1,27 +1,23 @@
 import sqlite3
-import socket
-from flask import Flask, request, render_template, \
-                  redirect
-
-from model_sqlite import save_doc_as_file_sqlite, \
-                  read_doc_as_file_sqlite, \
-                  get_last_entries_from_files_sqlite
-
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
+from flask import Flask, render_template, \
+    redirect
 from flask import request
-from win32timezone import now
+from model_sqlite import save_doc_as_file_sqlite, \
+    read_doc_as_file_sqlite, \
+    get_last_entries_from_files_sqlite, \
+    get_last_entries_from_files_admin_sqlite
 
 connection = sqlite3.connect('tp.db')
-connection2 = sqlite3.connect('user.db')
 
 cursor = connection.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS SHARECODE(uid CHAR(50) PRIMARY KEY, code text, langage CHAR(50))')
+cursor.execute('CREATE TABLE IF NOT EXISTS USER(id INTEGER PRIMARY KEY, uid CHAR(50), Ip CHAR(50), navigator CHAR(50), timestamp CHAR(50))')
 connection.commit()
 connection.close()
 
-cursor2 = connection2.cursor()
-cursor2.execute('CREATE TABLE IF NOT EXISTS USER(id INTEGER PRIMARY KEY, uid CHAR(50), Ip CHAR(50), navigator CHAR(50), timestamp CHAR(50))')
-connection2.commit()
-connection2.close()
 
 #cursor.execute("INSERT INTO SHARECODE VALUES('1', 'test', 'test')")
 
@@ -52,27 +48,9 @@ def publish():
     code = request.form['code']
     uid  = request.form['uid']
     langage = request.form['langage']
-    null = None
-    date_time = now()
-    cmd = request.user_agent.browser
-    connection = sqlite3.connect('tp.db')
-    connection2 = sqlite3.connect('user.db')
-    cursor = connection.cursor()
-    cursor2 = connection2.cursor()
-    cursor.execute("INSERT INTO SHARECODE VALUES(?, ?, ?)", (uid, code, langage))
-    connection.commit()
-    connection.close()
 
     save_doc_as_file_sqlite(uid,code,langage)
-    hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
-    print("Your Computer Name is:" + hostname)
-    print("Your Computer IP Address is:" + IPAddr)
-    print("Your browser is:" + cmd)
 
-    cursor2.execute("INSERT INTO USER VALUES(?, ?, ?, ?, ?)", (null, uid, IPAddr, cmd, date_time))
-    connection2.commit()
-    connection2.close()
     return redirect("{}{}/{}".format(request.host_url,
                                      request.form['submit'],
                                      uid))
@@ -89,6 +67,10 @@ def view(uid):
 @app.route('/admin/')
 def admin():
     pass
+    d = {'last_added':get_last_entries_from_files_admin_sqlite()}
+    code = 'print "Hello World"'
+    print(highlight(code, PythonLexer(), HtmlFormatter()))
+    return render_template('admin.html', **d)
 
 if __name__ == '__main__':
     app.run()
