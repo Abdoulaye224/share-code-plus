@@ -10,17 +10,20 @@ def create_uid(n=9):
    en évitant 0, O, I, l pour être sympa.'''
    chrs = [ c for c in chain(ascii_letters,digits)
                         if c not in '0OIl'  ]
-   return ''.join( ( choice(chrs) for i in range(n) ) ) 
+   return ''.join( ( choice(chrs) for i in range(n) ) )
 
-def save_doc_as_file(uid=None,code=None):
+def save_doc_as_file(uid=None, code=None, langage=None):
     '''Crée/Enregistre le document sous la forme d'un fichier
     data/uid. Return the file name.
     '''
     if uid is None:
         uid = create_uid()
         code = '# Write your code here...'
+        langage = ''
     with open('data/{}'.format(uid),'w') as fd:
         fd.write(code)
+    with open('data/{}'.format(uid + '.lang'), 'w') as fd:
+        fd.write(langage)
     return uid
 
 def read_doc_as_file(uid):
@@ -37,7 +40,7 @@ def get_last_entries_from_files(n=10,nlines=10):
     d = []
     entries = sorted(list(entries),
                      key=(lambda e: e.stat().st_mtime),
-                     reverse=True) 
+                     reverse=True)
     for i,e in enumerate(entries):
         if i >= n:
             break
