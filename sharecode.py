@@ -19,7 +19,7 @@ def index():
 def create():
     uid = save_doc_as_file()
     return redirect("{}edit/{}".format(request.host_url,uid))
-    
+
 @app.route('/edit/<string:uid>/')
 def edit(uid):
     code = read_doc_as_file(uid)
@@ -27,13 +27,14 @@ def edit(uid):
         return render_template('error.html',uid=uid)
     d = dict( uid=uid, code=code,
               url="{}view/{}".format(request.host_url,uid))
-    return render_template('edit.html', **d) 
+    return render_template('edit.html', **d)
 
 @app.route('/publish',methods=['POST'])
 def publish():
     code = request.form['code']
     uid  = request.form['uid']
-    save_doc_as_file(uid,code)
+    langage = request.form['langage']
+    save_doc_as_file(uid,code,langage)
     return redirect("{}{}/{}".format(request.host_url,
                                      request.form['submit'],
                                      uid))
